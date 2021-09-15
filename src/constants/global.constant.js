@@ -27,5 +27,14 @@ export default {
         messagingSenderId: process.env.MESSAGING_SENDER_ID,
         appId: process.env.APP_ID,
         measurementId: process.env.MEASUREMENT_ID
-    }
+    },
+
+    /**
+     * MAILER is Responsible For Authentication
+     * Automated Mails That Generate Passwords.
+    */
+   MAILER: {
+       EMAIL: process.env.MAILER_EMAIL,
+       PASS: process.env.MAILER_PASS
+   }
 };

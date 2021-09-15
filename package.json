@@ -10,9 +10,11 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "bcrypt": "^5.0.1",
     "express": "^4.17.1",
     "firebase": "^9.0.2",
-    "joi": "^17.4.2"
+    "joi": "^17.4.2",
+    "nodemailer": "^6.6.3"
   },
   "devDependencies": {
     "dotenv": "^10.0.0",

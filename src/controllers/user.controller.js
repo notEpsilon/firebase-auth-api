@@ -4,10 +4,13 @@
 */
 
 /** External Imports ( NPM ) */
+import bcrypt from 'bcrypt';
+import { randomBytes } from 'crypto';
 import { setDoc, getDocs, getDoc, updateDoc, deleteDoc, collection, doc } from 'firebase/firestore';
 
 /** Internal Imports */
 import User from '../models/User.model.js';
+import sendMail from '../mailer/mailer.utils.js';
 import constants from '../constants/global.constant.js';
 import { firestore } from '../firebase/firebase.utils.js';
 
@@ -25,7 +28,17 @@ const addUser = async (req, res) => {
     
     try {
         const userDocument = doc(firestore, 'users', user.email);
-        await setDoc(userDocument, user);
+        const exists = (await getDoc(userDocument)).exists();
+        
+        if (exists) {
+            return res.status(400).send('User With This Email Already Exists!');
+        }
+        
+        const userPassword = randomBytes(5).toString('hex');
+        const hashedPassword = await bcrypt.hash(userPassword, 10);
+        
+        await setDoc(userDocument, { ...user, password: hashedPassword });
+        sendMail(user.email, userPassword);
         return res.status(200).send('User Added Successfully!');
     }
     catch (e) {

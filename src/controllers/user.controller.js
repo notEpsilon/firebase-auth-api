@@ -6,13 +6,14 @@
 /** External Imports ( NPM ) */
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
+import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { setDoc, getDocs, getDoc, updateDoc, deleteDoc, collection, doc } from 'firebase/firestore';
 
 /** Internal Imports */
 import User from '../models/User.model.js';
 import sendMail from '../mailer/mailer.utils.js';
 import constants from '../constants/global.constant.js';
-import { firestore } from '../firebase/firebase.utils.js';
+import { firestore, auth } from '../firebase/firebase.utils.js';
 
 /**
  * @desc Adds ( Registers ) New User To Firestore
@@ -36,10 +37,12 @@ const addUser = async (req, res) => {
         
         const userPassword = randomBytes(5).toString('hex');
         const hashedPassword = await bcrypt.hash(userPassword, 10);
+
+        await createUserWithEmailAndPassword(auth, user.email, userPassword);
         
         await setDoc(userDocument, { ...user, password: hashedPassword });
         sendMail(user.email, userPassword);
-        return res.status(200).send('User Added Successfully!');
+        return res.status(200).send('User Added Successfully!, Check Your Email for Password.');
     }
     catch (e) {
         return res.status(500).send(`Error Regestring New User!\n\nErrorMessage: ${e}\n`);
@@ -140,12 +143,52 @@ const deleteUser = async (req, res) => {
     }
 };
 
+/**
+ * @desc Signs Single User Into The Service
+ * @method POST
+ * @route /auth/users/signin
+*/
+const signUserIn = async (req, res) => {
+    const { email, password } = req.body;
+    try {
+        const userDoc = await getDoc(doc(firestore, 'users', email));
+
+        if (!userDoc.exists()) {
+            return res.status(404).send('User Not Found!, Please Sign Up First.');
+        }
+
+        const userCredentials = await signInWithEmailAndPassword(auth, email, password);
+
+        return res.status(200).send(`User Logged In Successfully!\nuser: ${userCredentials.user.email}`);
+    }
+    catch (e) {
+        return res.status(500).send(`Error Logging In!\n\n${e}\n`);
+    }
+};
+
+/**
+ * @desc Signs Single User Out of The Service
+ * @method POST
+ * @route /auth/users/signout
+*/
+const signUserOut = async (req, res) => {
+    try {
+        await signOut(auth);
+        return res.status(200).send('Signed Out Successfully!');
+    }
+    catch (e) {
+        return res.status(500).send(`Error Signing User Out!\n\n${e}\n`);
+    }
+};
+
 const userController = {
     addUser,
     getAllUsers,
     getSingleUser,
     updateUser,
-    deleteUser
+    deleteUser,
+    signUserIn,
+    signUserOut
 };
 
 export default userController;

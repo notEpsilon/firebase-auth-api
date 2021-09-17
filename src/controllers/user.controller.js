@@ -6,6 +6,7 @@
 /** External Imports ( NPM ) */
 import bcrypt from 'bcrypt';
 import { randomBytes } from 'crypto';
+import { loggedIn } from '../firebase/firebase.utils.js';
 import { signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from 'firebase/auth';
 import { setDoc, getDocs, getDoc, updateDoc, deleteDoc, collection, doc } from 'firebase/firestore';
 
@@ -157,6 +158,10 @@ const signUserIn = async (req, res) => {
             return res.status(404).send('User Not Found!, Please Sign Up First.');
         }
 
+        if (loggedIn) {
+            return res.status(400).send('A User is Already Signed In, Sign Out First Please.');
+        }
+
         const userCredentials = await signInWithEmailAndPassword(auth, email, password);
 
         return res.status(200).send(`User Logged In Successfully!\nuser: ${userCredentials.user.email}`);
@@ -172,6 +177,10 @@ const signUserIn = async (req, res) => {
  * @route /auth/users/signout
 */
 const signUserOut = async (req, res) => {
+    if (!loggedIn) {
+        return res.status(400).send('You Are Already Signed Out.');
+    }
+    
     try {
         await signOut(auth);
         return res.status(200).send('Signed Out Successfully!');

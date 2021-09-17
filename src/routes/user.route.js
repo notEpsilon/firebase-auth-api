@@ -26,8 +26,8 @@ userRouter.put('/users/:mail', userController.updateUser);
 /** Delete User */
 userRouter.delete('/users/:mail', userController.deleteUser);
 
-/** Log User In */
-userRouter.post('/login', userController.signUserIn);
+/** Sign User In */
+userRouter.post('/signin', userController.signUserIn);
 
 /** Sign User Out */
 userRouter.post('/signout', userController.signUserOut);

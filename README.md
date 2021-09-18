@@ -1,5 +1,5 @@
 # firebase-auth-api
-This is a complete authentication service including validation and database storage.
+This is a complete authentication service including validation and database storage using firebase & nodejs.
 
 ## Usage
 1. download the files and run `npm install` to install the dependencies.
